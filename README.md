@@ -7,3 +7,10 @@ Then update the board manager > type esp32 and download/update the boards availa
 
 Follow this tutorial for Webserver:
 https://randomnerdtutorials.com/esp32-async-web-server-espasyncwebserver-library/
+
+Use this libary for the sd card:
+https://github.com/nhatuan84/esp32-micro-sdcard
+
+Format sd card:
+
+open powershell as admin and: '''format /FS:FAT32 D:''' > change D: to your drive. 

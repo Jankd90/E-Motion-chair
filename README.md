@@ -49,7 +49,7 @@ Relevant info:
 
 *Current writing speed is +-38files/minute thus an estimate of 20ms to safe data to file
 
-<p align="center">
+<div align="center">
 
 |  Time  | Files | 
 |--------|-------|
@@ -60,5 +60,5 @@ Relevant info:
 | 4 min. |  319  |
 | 5 min. |  356  |
 
-</p>
+</div>
 

@@ -44,7 +44,8 @@ Relevant info:
 *change the select_sensor_to_read() and read_sensor() with real sensor data.
 <p align="center">
 <img src="./e-motion-chair-smart-sensing.svg">
-</p>
+</p> 
+
 ## Tests
 
 *Current writing speed is +-38files/minute thus an estimate of 20ms to safe data to file

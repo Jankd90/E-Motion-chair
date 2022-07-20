@@ -40,8 +40,8 @@ Relevant info:
 
 ## TODO
 
-*Implement sensing logic to only safe data when someone is sitting
-*change the select_sensor_to_read() and read_sensor() with real sensor data.
+* Implement sensing logic to only safe data when someone is sitting
+* change the select_sensor_to_read() and read_sensor() with real sensor data.
 
 <p align="center">
 <img src="./e-motion-chair-smart-sensing.svg">

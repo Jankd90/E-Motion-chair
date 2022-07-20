@@ -2,24 +2,36 @@
 
 ## Getting started
 
-Add the following to your arduino IDE: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
-Then update the board manager > type esp32 and download/update the boards available.
+Add the [ESP board URL] to your arduino IDE.
+Then update the board manager by typing esp32 and download/update the boards available.
 
-Follow this tutorial for Webserver:
-https://randomnerdtutorials.com/esp32-async-web-server-espasyncwebserver-library/
+The [LilyGO TTGO T8 ESP32-S2] - with SD Card Slot is used in this project.
 
-Use this libary for the sd card:
-https://github.com/nhatuan84/esp32-micro-sdcard
+To use the SD card you need to change the pin definition to comunicate over SPI.
+You will find the h-file you need to change in the installed package of esp32s2.
+If you are on windows you will find the package in AppData.
+**...\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.4\variants\esp32s2\pins_arduino.h**
 
-Format sd card:
+Open the file and change the SS, MOSI, MISO and SCK to match the following:
 
-open powershell as admin and: '''format /FS:FAT32 D:''' > change D: to your drive. 
-
-http://www.iotsharing.com/2017/05/how-to-use-arduino-esp32-to-store-data-to-sdcard.html
-
-C:\Users\jgm_6\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.4\variants\esp32s2\pins_arduino.h
-
+```json
 static const uint8_t SS    = 10;
 static const uint8_t MOSI  = 11;
 static const uint8_t MISO  = 13;
 static const uint8_t SCK   = 12;
+```
+You need to download and install 2 modules as .zip for this project:
+* [ESPAsyncWebServer] 
+* [AsyncTCP]
+
+[ESP board URL]: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
+[ESPAsyncWebServer]: https://github.com/me-no-dev/ESPAsyncWebServer/archive/master.zip
+[AsyncTCP]: https://github.com/me-no-dev/AsyncTCP/archive/master.zip
+[LilyGO TTGO T8 ESP32-S2]: https://www.tinytronics.nl/shop/en/development-boards/microcontroller-boards/with-wi-fi/lilygo-ttgo-t8-esp32-s2-with-sd-card-slot
+
+Do not forget to format your sd card to FAT32!
+Add the index.html file to your sd card.
+
+Relevant info:
+* https://randomnerdtutorials.com/esp32-async-web-server-espasyncwebserver-library/
+* https://www.easeus.com/partition-master/sd-card-mounted-as-read-only.html

@@ -1,4 +1,6 @@
 int state = 0;
+int sensorPin;
+
 int read_RTC(){
   int result;
   return result;
@@ -13,16 +15,17 @@ int write_data_to_SD(){
   int result;
   return result;
 };
-int set_sensor_to_read(){
-  int result;
-  return result;
+void set_sensor_to_read(int pin){
+  sensorPin = (sensorPin + 1) % 10;
+  //sensorPin = pin;
 };
 int read_sensor(){
-  int result;
+  //some functionality to read from sensorPin
+  int result = sensorPin;
   return result;
 };
 void synchronize_clock(){
-  int result;
+  
 };
 void get_network_time(){
 };

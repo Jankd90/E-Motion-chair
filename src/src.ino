@@ -6,45 +6,15 @@
 
 #include <SPI.h>
 #include <SD.h>
+#include <HTTPClient.h>
 
 int count = 0;
 AsyncWebServer server(80);
-
-
-void printDirectory(File dir, int numTabs) {
-  while (true) {
- 
-    File entry =  dir.openNextFile();
-    if (! entry) {
-      // no more files
-      break;
-    }
-    for (uint8_t i = 0; i < numTabs; i++) {
-      Serial.print('\t');
-    }
-    Serial.print(entry.name());
-    if (entry.isDirectory()) {
-      Serial.println("/");
-      printDirectory(entry, numTabs + 1);
-    } else {
-      // files have sizes, directories do not
-      Serial.print("\t\t");
-      Serial.print(entry.size(), DEC);
-      time_t lw = entry.getLastWrite();
-      struct tm * tmstruct = localtime(&lw);
-      Serial.printf("\tLAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour, tmstruct->tm_min, tmstruct->tm_sec);
-    }
-    entry.close();
-  }
-}
-void writeFile(const char * path){
-    File file2 = SD.open(path, FILE_WRITE);
-    if(file2){
-    file2.println("test");
-    file2.flush();
-    file2.close();
-    }
-  }
+String payload = String("0");
+String startOfString = String("/test_");
+String endOfString = String(".csv");
+int statusCount = 0;
+int fileCountOnSD = 0; 
 
 void setup() {
     Serial.begin(9600);
@@ -57,32 +27,91 @@ void setup() {
   } else {
     Serial.println("Wiring is correct and a card is present.");
   }
-  
+  File dir = SD.open("/");
+  fileCountOnSD = 0;
+  while (true) {
+    File entry =  dir.openNextFile();
+    if (! entry) {
+      break;
+      }
+    entry.close(); 
+    fileCountOnSD++;
+    };
+    Serial.print("fileCountOnSD: ");
+    Serial.println(fileCountOnSD);
     Serial.print("Connecting to ");
     Serial.println(ssid);
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
+        statusCount++;
+        if(statusCount==5){
+          ESP.restart();
+          }
     }
     Serial.println("");
     Serial.println("WiFi connected.");
     Serial.println("IP address: ");
     Serial.println(WiFi.localIP());
+
+    HTTPClient http;
+
+    
+    Serial.print("Sending request");
+    
+    http.begin(serverPath.c_str());
+    int httpResponseCode = http.GET();
+      
+      if (httpResponseCode>0) {
+        Serial.print("HTTP Response code: ");
+        Serial.println(httpResponseCode);
+        String payload = http.getString();
+        count = payload.toInt();
+        Serial.println(payload);
+      }
+      else {
+        Serial.print("Error code: ");
+        Serial.println(httpResponseCode);
+      }
+      // Free resources
+      http.end();
+    
     server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", String(state));
     });
-    server.on("/addfile", HTTP_GET, [](AsyncWebServerRequest *request){
-      writeFile("/hello123.txt");
-      request->send(200, "text/plain", String("Written file"));
-    });
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(SD, "/index.html", "text/html");
+  });
+      server.on("/files", HTTP_GET, [](AsyncWebServerRequest *request){
+        
+    request->send(200, "text/plain", String(fileCountOnSD));
+  });
+    server.serveStatic("/", SD, "/");
     server.begin();
     
     
-    
-    File dir =  SD.open("/");
-    printDirectory(dir, 0);
+    //File dir =  SD.open("/");
+    //printDirectory(dir, 0);
 }
 
 void loop() {
+  String path = startOfString + String(count) + endOfString;
+  File csvFile = SD.open(path, FILE_WRITE);
+  for(int j =0; j<25; j++){
+    for(int i =0; i<10; i++){
+      set_sensor_to_read(i);
+      int result = read_sensor();
+      csvFile.print(result);
+      csvFile.print(",");
+    }
+    delay(40);//25Hz sampling
+    csvFile.println("");
+  }
+  if(csvFile){
+  csvFile.flush();
+  csvFile.close();
+  }
+  fileCountOnSD++;
+  count++;
 }

@@ -42,14 +42,14 @@ Relevant info:
 
 *Implement sensing logic to only safe data when someone is sitting
 *change the select_sensor_to_read() and read_sensor() with real sensor data.
-
+<center>
 <img src="./e-motion-chair-smart-sensing.svg">
-
+</center>
 ## Tests
 
 *Current writing speed is +-38files/minute thus an estimate of 20ms to safe data to file
 
-Layout:
+<center>
 |  Time  | Files | 
 |--------|-------|
 | 0 min. |  169  |
@@ -58,3 +58,4 @@ Layout:
 | 3 min. |  282  |
 | 4 min. |  319  |
 | 5 min. |  356  |
+</center>

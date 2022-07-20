@@ -37,3 +37,24 @@ Add the index.html file to your sd card and upload the project!
 Relevant info:
 * https://randomnerdtutorials.com/esp32-async-web-server-espasyncwebserver-library/
 * https://www.easeus.com/partition-master/sd-card-mounted-as-read-only.html
+
+## TODO
+
+*Implement sensing logic to only safe data when someone is sitting
+*change the select_sensor_to_read() and read_sensor() with real sensor data.
+
+<img src="./e-motion-chair-smart-sensing.svg">
+
+## Tests
+
+*Current writing speed is +-38files/minute thus an estimate of 20ms to safe data to file
+
+Layout:
+|  Time  | Files | 
+|--------|-------|
+| 0 min. |  169  |
+| 1 min. |  207  |
+| 2 min. |  245  |
+| 3 min. |  282  |
+| 4 min. |  319  |
+| 5 min. |  356  |

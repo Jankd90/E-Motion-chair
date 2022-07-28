@@ -1,3 +1,4 @@
+//importing dependencies
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
@@ -7,8 +8,17 @@
 #include <SPI.h>
 #include <SD.h>
 #include <HTTPClient.h>
+#include <ErriezDS3231.h>
+#include <Wire.h>
 
-int count = 0;
+// Create RTC object
+ErriezDS3231 rtc;
+
+//define RTC I2C module pins
+#define I2C_SDA 8
+#define I2C_SCL 7
+
+time_t count = 0;
 AsyncWebServer server(80);
 String payload = String("0");
 String startOfString = String("/test_");
@@ -17,7 +27,19 @@ int statusCount = 0;
 int fileCountOnSD = 0; 
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
+
+    // Setting pinmode for reading sensors 
+    pinMode(1, OUTPUT);
+    pinMode(2, OUTPUT);
+    pinMode(3, OUTPUT);
+
+    // connecting to RTC module
+    delay(500);
+    Wire.begin(I2C_SDA, I2C_SCL);
+    Wire.setClock(100000);
+
+    //check if SD card is connected
       if (!SD.begin()) {
     Serial.println("initialization failed. Things to check:");
     Serial.println("* is a card inserted?");
@@ -27,6 +49,8 @@ void setup() {
   } else {
     Serial.println("Wiring is correct and a card is present.");
   }
+
+  // open sd card and check for amount of files 
   File dir = SD.open("/");
   fileCountOnSD = 0;
   while (true) {
@@ -39,9 +63,12 @@ void setup() {
     };
     Serial.print("fileCountOnSD: ");
     Serial.println(fileCountOnSD);
-    Serial.print("Connecting to ");
+
+    //start wifi connection to network in conf.h file
+    Serial.print("`trying to connect to ");
     Serial.println(ssid);
     WiFi.begin(ssid, password);
+
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
@@ -50,25 +77,28 @@ void setup() {
           ESP.restart();
           }
     }
-    Serial.println("");
-    Serial.println("WiFi connected.");
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
 
-    HTTPClient http;
+    // check if wifi connection was succesfull, if so starts webserver
+    if (WiFi.status() == WL_CONNECTED){
+      Serial.println("");
+      Serial.println("WiFi connected.");
+      Serial.println("IP address: ");
+      Serial.println(WiFi.localIP());
 
+      HTTPClient http;
+  
+      Serial.print("Sending request");
     
-    Serial.print("Sending request");
-    
-    http.begin(serverPath.c_str());
-    int httpResponseCode = http.GET();
+      http.begin(serverPath.c_str());
+      int httpResponseCode = http.GET();
       
       if (httpResponseCode>0) {
         Serial.print("HTTP Response code: ");
         Serial.println(httpResponseCode);
         String payload = http.getString();
-        count = payload.toInt();
         Serial.println(payload);
+        time_t new_rtc = payload.toInt();
+        rtc.setEpoch(new_rtc);
       }
       else {
         Serial.print("Error code: ");
@@ -76,42 +106,74 @@ void setup() {
       }
       // Free resources
       http.end();
-    
-    server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request){
+
+      server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", String(state));
-    });
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SD, "/index.html", "text/html");
-  });
-      server.on("/files", HTTP_GET, [](AsyncWebServerRequest *request){
-        
-    request->send(200, "text/plain", String(fileCountOnSD));
-  });
-    server.serveStatic("/", SD, "/");
-    server.begin();
-    
-    
+      });
+      
+      server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(SD, "/index.html", "text/html");
+      });
+      
+      server.on("/files", HTTP_GET, [](AsyncWebServerRequest *request){ 
+      request->send(200, "text/plain", String(fileCountOnSD));
+      });
+      
+      server.serveStatic("/", SD, "/");
+      server.begin();
+      }else {
+    Serial.print("unable to connect to wifi");
+  }
+  
     //File dir =  SD.open("/");
     //printDirectory(dir, 0);
-}
+  }
+
+
 
 void loop() {
+
+  // set count to current UNIX epoch (either from internet or rtc module)
+  count = rtc.getEpoch();
+
+  
   String path = startOfString + String(count) + endOfString;
   File csvFile = SD.open(path, FILE_WRITE);
+
+  //read 25 points 
+  int result_array[9];
   for(int j =0; j<25; j++){
-    for(int i =0; i<10; i++){
-      set_sensor_to_read(i);
-      int result = read_sensor();
+
+  
+    //read voltage (ADC) for every sensor
+    for(int i =0; i<9; i++){
+      
+      //set_sensor_to_read(i); //not used, reserve vor Mux Mux setup
+      int result = read_sensor(i);
+      result_array[i] = result;
       csvFile.print(result);
       csvFile.print(",");
-    }
+      }
+    
     delay(40);//25Hz sampling
     csvFile.println("");
   }
+
+  // print values every 25 points / s  (25Hz) for debugging
+  Serial.print("current time is: ");
+  Serial.print(count);
+  Serial.print(" Data: ");
+  for(int i =0; i<9; i++){
+    Serial.print(result_array[i]);
+    Serial.print(",");
+  }
+  Serial.println("");
+  
   if(csvFile){
   csvFile.flush();
   csvFile.close();
   }
+  
   fileCountOnSD++;
   count++;
-}
+  }

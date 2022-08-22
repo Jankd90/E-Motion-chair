@@ -21,7 +21,7 @@ background-size: 100%;
 
 
     }
-    h1, h2 {
+    h1, h2, h3 {
         margin: 0;
         font-family: 'Open Sans', sans-serif;
   color: white;
@@ -33,21 +33,116 @@ background-size: 100%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
+.btn-group button {
+  background-color: #989898; /* Green background */
+  border: 1px solid rgb(0, 0, 0); /* Green border */
+  color: white; /* White text */
+  padding: 10px 24px; /* Some padding */
+  cursor: pointer; /* Pointer/hand icon */
+  float: left; /* Float the buttons side by side */
+  font-family: 'Open Sans', sans-serif;
+  
+}
+
+/* Clear floats (clearfix hack) */
+.btn-group:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.btn-group button:not(:last-child) {
+  border-right: none; /* Prevent double borders */
+}
+
+
+
 </style>    
 <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Motion-Chair</title>
 </head>
-<body>
+<body onload="getStatus();">
 <div class="background">
     <div class="center">
         <h1>E-Motion chair</h1>
         <h2>0.3.1</h2>
+        <br>
+        <h3>Sample frequency</h3>
+        <br>
+    <div class="btn-group" id="g1">
+        <button id="1-f" onclick="setFrequency(this)" value='1'>1 Hz</button>
+        <button id="5-f" onclick="setFrequency(this)" value='5'>5 Hz</button>
+        <button id="10-f" onclick="setFrequency(this)" value='10'>10 Hz</button>
+        <button id="25-f" onclick="setFrequency(this)" value='25'>25 Hz</button>
+      </div>
+      <br>
+    <h3>Recording time</h3>  
+    <br>
+      <div class="btn-group" id="g2">
+        <button id="1-t" onclick="setTime(this)" value='1'>1 min.</button>
+        <button id="3-t" onclick="setTime(this)" value='3'>3 min.</button>
+        <button id="5-t" onclick="setTime(this)" value='5'>5 min.</button>
+        <button id="10-t" onclick="setTime(this)" value='10'>10 min.</button>
+      </div>
     </div>
-   
+    
 </div>
     
     
 </body>
+<script>
+var sampleTime = 3;
+var sampleFrequency = 25;    
+    function setFrequency(objButton){  
+        var myElement = document.getElementById('g1');
+    for (let i = 0; i < myElement.children.length; i++) {
+        myElement.children[i].style.backgroundColor = "#989898"; 
+    }
+        objButton.style.backgroundColor = "#f7931d";
+        var theUrl = `${window.location.href}samplefrequency/${objButton.value}`;
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+        xmlHttp.send( null );
+        //alert(xmlHttp.responseText);
+}
+
+function setTime(objButton){  
+    var myElement = document.getElementById('g2');
+    for (let i = 0; i < myElement.children.length; i++) {
+        myElement.children[i].style.backgroundColor = "#989898"; 
+    }
+    objButton.style.backgroundColor = "#f7931d";    
+    var theUrl = `${window.location.href}sampleminutes/${objButton.value}`;
+        //alert(objButton.id);
+        
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+        xmlHttp.send( null );
+        //alert(xmlHttp.responseText);
+}
+function setColor(btn, color) {
+    var property = document.getElementById(btn);
+}
+function getStatus(){
+    var theUrl = `${window.location.href}1`;
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    sampleTime = parseInt(xmlHttp.responseText)/60;
+    var el = document.getElementById(`${sampleTime}-t`);
+    el.style.backgroundColor = "#f7931d";
+    //alert(sampleTime);
+
+    var theUrl = `${window.location.href}2`;
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    sampleFrequency = xmlHttp.responseText;
+    var el = document.getElementById(`${sampleFrequency}-f`);
+    el.style.backgroundColor = "#f7931d";
+    //alert(sampleFrequency);
+}
+</script>
 </html>

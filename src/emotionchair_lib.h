@@ -1,6 +1,5 @@
-int state = 0;
 int sensorPin;
-
+int state = 10;
 int read_RTC(){
   int result;
   return result;

@@ -1,5 +1,8 @@
-const char* ssid     = "LaunchCafe";
-const char* password = "Groningen";
+const char* ssid     = "AndroidAPE7EC";
+const char* password = "snun4082";
+
+//const char* ssid     = "LaunchCafe";
+//const char* password = "Groningen";
 
 //const char* ssid     = "Verbindingsstraat 6";
 //const char* password = "NietVoorAlgemeenGebruik9745AH!";

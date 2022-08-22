@@ -124,56 +124,36 @@ void setup() {
       }else {
     Serial.print("unable to connect to wifi");
   }
-  
     //File dir =  SD.open("/");
     //printDirectory(dir, 0);
   }
-
-
 
 void loop() {
 
   // set count to current UNIX epoch (either from internet or rtc module)
   count = rtc.getEpoch();
-
-  
   String path = startOfString + String(count) + endOfString;
   File csvFile = SD.open(path, FILE_WRITE);
 
   //read 25 points 
   int result_array[9];
   for(int j =0; j<25; j++){
-
-  
     //read voltage (ADC) for every sensor
     for(int i =0; i<9; i++){
-      
       //set_sensor_to_read(i); //not used, reserve vor Mux Mux setup
       int result = read_sensor(i);
       result_array[i] = result;
       csvFile.print(result);
       csvFile.print(",");
       }
-    
     delay(40);//25Hz sampling
     csvFile.println("");
   }
 
-  // print values every 25 points / s  (25Hz) for debugging
-  Serial.print("current time is: ");
-  Serial.print(count);
-  Serial.print(" Data: ");
-  for(int i =0; i<9; i++){
-    Serial.print(result_array[i]);
-    Serial.print(",");
-  }
-  Serial.println("");
-  
   if(csvFile){
   csvFile.flush();
   csvFile.close();
   }
-  
-  fileCountOnSD++;
-  count++;
+  //Check the time
+  Serial.println(millis());
   }

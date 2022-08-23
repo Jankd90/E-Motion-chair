@@ -198,13 +198,15 @@ void loop() {
      //Detecting presure
      
     //check speed
-    Serial.print("measure: ");
-    Serial.println(millis());
+    Serial.println(".");
+    //Serial.println(millis());
   }
 
   if(csvFile){
   csvFile.close();
   }
+  total = total/(sampleFrequency*sampleTime);
+  Serial.print(total);
   if(total > 200){
        status = true;
       }
@@ -212,8 +214,9 @@ void loop() {
        status = false;
       }
   //Check the time
-  Serial.print("Time: ");
-  Serial.println(millis());
-  Serial.print("total value ");
-  Serial.print(total);
+  //Serial.print("Time: ");
+  //Serial.println(millis());
+  Serial.println("");
+  Serial.print("total value: ");
+  Serial.println(total);
   }

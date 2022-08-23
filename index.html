@@ -29,7 +29,7 @@ background-size: 100%;
 }
 .center{
     position: fixed;
-    top: 45%;
+    top: 35%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
@@ -54,7 +54,9 @@ background-size: 100%;
 .btn-group button:not(:last-child) {
   border-right: none; /* Prevent double borders */
 }
-
+#canvas{
+    position: absolute; top: 15rem; left: 0px; right: 0px; bottom: 0px; margin: auto; 
+}
 
 
 </style>    
@@ -65,11 +67,14 @@ background-size: 100%;
 </head>
 <body onload="getStatus();">
 <div class="background">
+    <button onclick="changeContent()">toggle</button>
     <div class="center">
         <h1>E-Motion chair</h1>
         <h2>0.3.1</h2>
         <br>
-        <h3>Sample frequency</h3>
+        <br>
+        <div id="buttons">
+            <h3>Sample frequency</h3>
         <br>
     <div class="btn-group" id="g1">
         <button id="1-f" onclick="setFrequency(this)" value='1'>1 Hz</button>
@@ -87,14 +92,29 @@ background-size: 100%;
         <button id="10-t" onclick="setTime(this)" value='10'>10 min.</button>
       </div>
     </div>
-    
+    </div>
+    <canvas id="canvas" width="300" height="300" style="display: none;"></canvas>
 </div>
-    
+
     
 </body>
 <script>
 var sampleTime = 3;
-var sampleFrequency = 25;    
+var sampleFrequency = 25; 
+
+function changeContent(){
+    if(document.getElementById("canvas").style.display == 'none'){
+        document.getElementById("canvas").style.display = '';
+        document.getElementById("buttons").style.display = 'none';
+    } 
+    else{
+        document.getElementById("canvas").style.display = 'none';
+        document.getElementById("buttons").style.display = '';
+    
+    }
+    
+}
+
     function setFrequency(objButton){  
         var myElement = document.getElementById('g1');
     for (let i = 0; i < myElement.children.length; i++) {
@@ -144,5 +164,23 @@ function getStatus(){
     el.style.backgroundColor = "#f7931d";
     //alert(sampleFrequency);
 }
+
+
+// Now you can just call
+var ctx = document.getElementById("canvas").getContext("2d");
+
+ctx.beginPath();
+ctx.moveTo(0, 0);
+ctx.lineTo(0, 225);
+ctx.arcTo(0, 300,   75, 300, 75);
+ctx.lineTo(225, 300);
+ctx.arcTo(300, 300,   300, 225, 75);
+ctx.lineTo(300, 0);
+ctx.lineTo(0, 0); 
+    ctx.fillStyle = "#f7931d";
+    ctx.fill();
+// Draw using default border radius, 
+// stroke it but no fill (function's default values)
+
 </script>
 </html>

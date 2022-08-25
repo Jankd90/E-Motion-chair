@@ -64,3 +64,15 @@ Relevant info:
 
 </div>
 
+## connecting to ESP32 on network 
+
+To make connecting to one of the multiple ESP32's more easy we use the mDNS protocol (also called bonjour on the mac). This protocol broadcasts the device and it's IP on the network so it's easily found and can be connected to.
+
+option 1 is to install [service browser for android] : (https://play.google.com/store/apps/details?id=com.druk.servicebrowser&hl=en).
+
+option 2 is to use the command line (windows or mac)
+- connect to the same network
+- open commandline
+- input `dns-sd -B _E-motion_chair._tcp` into the commandline. This will display all ESP's  on the network
+- in the browser you can now choose an instance (i.e. EM-1521056) and connect to it using your browser `http://em-1521056.local/`
+- it is also possible from the command line to ping the ESP32 using `ping em-1521056.local` this gives the IP and shows if the ESP32 is actually working.

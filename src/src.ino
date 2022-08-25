@@ -10,6 +10,7 @@
 #include <HTTPClient.h>
 #include <ErriezDS3231.h>
 #include <Wire.h>
+#include "ESPmDNS.h"
 
 // Create RTC object
 ErriezDS3231 rtc;
@@ -64,7 +65,7 @@ void setup() {
     Serial.println("Wiring is correct and a card is present.");
   }
     //start wifi connection to network in conf.h file
-    Serial.print("`trying to connect to ");
+    Serial.print("trying to connect to ");
     Serial.println(ssid);
     WiFi.begin(ssid, password);
 
@@ -72,8 +73,8 @@ void setup() {
         delay(500);
         Serial.print(".");
         statusCount++;
-        if(statusCount==5){
-          Serial.print("Not connected");
+        if(statusCount==10){
+          Serial.print("Could not connect to WiFi");
           break;
           //ESP.restart();
           }
@@ -81,11 +82,37 @@ void setup() {
 
     // check if wifi connection was succesfull, if so starts webserver
     if (WiFi.status() == WL_CONNECTED){
+      
       Serial.println("");
       Serial.println("WiFi connected.");
       Serial.println("IP address: ");
       Serial.println(WiFi.localIP());
 
+      #include "ESPmDNS.h"
+        Serial.print("my mac adress is: ");
+        Serial.println(ESP.getEfuseMac());
+        const char *nametemplate = "EM-";
+        
+        uint32_t chipId = 0;
+        
+          for(int i=0; i<17; i=i+8) {
+            chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
+          }
+        
+        String result = String(nametemplate) + String(chipId);
+
+        const char *my_Name = result.c_str();
+        
+        if (MDNS.begin(my_Name))
+        {
+          Serial.println("mDNS responder started");
+          Serial.print("I am: ");
+          Serial.println(my_Name);
+       
+          // Add service to MDNS-SD
+          MDNS.addService("E-motion_chair", "tcp", 23);
+        }
+        
       HTTPClient http;
   
       Serial.print("Sending request");
@@ -166,7 +193,7 @@ void setup() {
       server.serveStatic("/", SD, "/");
       server.begin();
       }else {
-    Serial.print("unable to connect to wifi");
+    Serial.println("Starting in offline mode");
   }
   }
 

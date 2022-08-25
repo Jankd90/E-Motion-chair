@@ -27,8 +27,10 @@ int statusCount = 0;
 int fileCountOnSD = 0; 
 bool status = true;
 
+int FX = 0;
+int FY = 0;
 
-int setSampleFrequency = 10;
+int setSampleFrequency = 1;
 int sampleFrequency = setSampleFrequency;
 int setSampleTime = 60;
 int sampleTime = setSampleTime;
@@ -107,7 +109,13 @@ void setup() {
       http.end();
 
       server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request){
-      request->send(200, "text/plain", String(state));
+      request->send(200, "text/plain", String(status));
+      });
+      server.on("/x", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(200, "text/plain", String(FX));
+      });
+            server.on("/y", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(200, "text/plain", String(FY));
       });
             server.on("/1", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", String(setSampleTime));
@@ -177,45 +185,59 @@ void loop() {
   sampleFrequency = 1;
   sampleTime = 1;
   }
-  int result_array[9];
+  //int result_array[9];
   //3 minutes....25*180
   unsigned int total = 0;
+  int dis[3]= {1,13,25};
+  int sm = ((1000/sampleFrequency)-5);
   for(int j =0; j<sampleFrequency*sampleTime; j++){
     //read voltage (ADC) for every sensor
+    int sumV = 0;
+    FX = 0;
+    FY = 0;
+    Serial.println(".");
     for(int i =0; i<9; i++){
       int result = read_sensor(i);
-      total += result/9;
-      result_array[i] = result;
+      sumV += result;
+      FX += dis[i%3]*result;
+      FY += dis[(i/3)%3]*result;
+      Serial.print(result);
+      Serial.print(",");
        if(status){
       csvFile.print(result);
       csvFile.print(",");
        }
       }
+      sumV++;
+      total += sumV/9;
+      FX = FX/sumV;
+      FY = FY/sumV;
      if(status){
       csvFile.println("");
       }
-     delay(int((1000/sampleFrequency)-5));//..Hz sampling
+     delay(sm);//..Hz sampling
      //Detecting presure
-     
     //check speed
     Serial.println(".");
     //Serial.println(millis());
+    Serial.print("FX and FY ");
+    Serial.print(FX);
+    Serial.print(", ");
+    Serial.print(FY);
+    Serial.print(", ");
   }
 
   if(csvFile){
   csvFile.close();
   }
   total = total/(sampleFrequency*sampleTime);
-  Serial.print(total);
+  //Serial.print(total);
   if(total > 200){
        status = true;
       }
      else{
        status = false;
       }
-  //Check the time
-  //Serial.print("Time: ");
-  //Serial.println(millis());
   Serial.println("");
   Serial.print("total value: ");
   Serial.println(total);

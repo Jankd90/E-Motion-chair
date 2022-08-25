@@ -4,6 +4,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <style>
     body{
         padding:0;
@@ -27,9 +28,17 @@ background-size: 100%;
   color: white;
   text-align: center;
 }
+h1{margin-top: 3rem;}
+h2{
+    font-size: smaller;
+
+}
+h3{
+    font-size: medium;
+}
 .center{
     position: fixed;
-    top: 35%;
+    top: 30%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
@@ -57,6 +66,13 @@ background-size: 100%;
 #canvas{
     position: absolute; top: 15rem; left: 0px; right: 0px; bottom: 0px; margin: auto; 
 }
+#toggle{
+    padding: 0.3rem;
+    margin: 3rem;
+    position:absolute;
+   top:0;
+   right:0;
+}
 
 
 </style>    
@@ -67,13 +83,18 @@ background-size: 100%;
 </head>
 <body onload="getStatus();">
 <div class="background">
-    <button onclick="changeContent()">toggle</button>
+    <button id="toggle" class="mdc-icon-button material-icons" onclick="changeContent()">
+        <div class="mdc-icon-button__ripple"></div>
+        favorite
+      </button>
+      
     <div class="center">
         <h1>E-Motion chair</h1>
         <h2>0.3.1</h2>
         <br>
         <br>
         <div id="buttons">
+            
             <h3>Sample frequency</h3>
         <br>
     <div class="btn-group" id="g1">
@@ -165,10 +186,22 @@ function getStatus(){
     //alert(sampleFrequency);
 }
 
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext('2d');
 
-// Now you can just call
-var ctx = document.getElementById("canvas").getContext("2d");
 
+setInterval(function(){ 
+	var theUrl = `${window.location.href}x`;
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    var centerX = (250-parseInt(xmlHttp.responseText)*10)+21;
+    var theUrl = `${window.location.href}y`;
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    var centerY = (250-parseInt(xmlHttp.responseText)*10)+21;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 ctx.beginPath();
 ctx.moveTo(0, 0);
 ctx.lineTo(0, 225);
@@ -179,6 +212,13 @@ ctx.lineTo(300, 0);
 ctx.lineTo(0, 0); 
     ctx.fillStyle = "#f7931d";
     ctx.fill();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 20, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+}, 300);//run this thang every 2 seconds
+
+
 // Draw using default border radius, 
 // stroke it but no fill (function's default values)
 

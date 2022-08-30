@@ -64,8 +64,12 @@ void setup() {
   } else {
     Serial.println("Wiring is correct and a card is present.");
   }
+
+  Serial.print("local RTC time is: ");
+  Serial.println(rtc.getEpoch());
+  
     //start wifi connection to network in conf.h file
-    Serial.print("`trying to connect to ");
+    Serial.print("trying to connect to ");
     Serial.println(ssid);
     WiFi.begin(ssid, password);
 
@@ -73,7 +77,7 @@ void setup() {
         delay(500);
         Serial.print(".");
         statusCount++;
-        if(statusCount==5){
+        if(statusCount==10){
           Serial.print("Not connected");
           break;
           //ESP.restart();
@@ -87,25 +91,24 @@ void setup() {
       Serial.println("IP address: ");
       Serial.println(WiFi.localIP());
 
+      Serial.print("my mac adress is: ");
+      Serial.println(ESP.getEfuseMac());
+      const char *nametemplate = "EM-";
 
-        Serial.print("my mac adress is: ");
-        Serial.println(ESP.getEfuseMac());
-        const char *nametemplate = "EM-";
+      uint32_t chipId = 0;
 
-        uint32_t chipId = 0;
-
-          for(int i=0; i<17; i=i+8) {
-            chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
-          }
+        for(int i=0; i<17; i=i+8) {
+          chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
+        }
 
         String result = String(nametemplate) + String(chipId);
 
         const char *my_Name = result.c_str();
-
+        Serial.print("I am: ");
+        
         if (MDNS.begin(my_Name))
         {
           Serial.println("mDNS responder started");
-          Serial.print("I am: ");
           Serial.println(my_Name);
 
           // Add service to MDNS-SD
@@ -123,6 +126,7 @@ void setup() {
         Serial.print("HTTP Response code: ");
         Serial.println(httpResponseCode);
         String payload = http.getString();
+        Serial.print("New local RTC set to: ");
         Serial.println(payload);
         time_t new_rtc = payload.toInt();
         rtc.setEpoch(new_rtc);
@@ -133,6 +137,8 @@ void setup() {
       }
       // Free resources
       http.end();
+
+      
 
       server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", String(status));
@@ -184,6 +190,10 @@ void setup() {
         server.on("/sampleminutes/10", HTTP_GET, [](AsyncWebServerRequest *request){
           setSampleTime = sampleSet[3];
           request->send(200, "text/plain", String(setSampleTime));
+      });
+
+      server.on("/time", HTTP_GET, [](AsyncWebServerRequest *request){
+      request->send(200, "text/plain", String(count));
       });
       
       server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
